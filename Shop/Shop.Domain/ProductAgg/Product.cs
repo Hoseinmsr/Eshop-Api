@@ -20,7 +20,8 @@ namespace Shop.Domain.ProductAgg
         public Product(string title, string imageName, string description, long categoryId,
             long subCategoryId, long secondarySubCategoryId, SeoData seoData,string slug, IProductDomainService domainService)
         {
-            Guard(title, slug, imageName, description, domainService);
+            NullOrEmptyDomainDataException.CheckString(imageName, nameof(imageName));
+            Guard(title, slug,  description, domainService);
             Title = title;
             ImageName = imageName;
             Description = description;
@@ -43,18 +44,23 @@ namespace Shop.Domain.ProductAgg
         public List<ProductSpecification> Specifications { get; private set; }
 
 
-        public void Edit(string title, string imageName, string description, long categoryId,
+        public void Edit(string title, string description, long categoryId,
         long subCategoryId, long secondarySubCategoryId, SeoData seoData,string slug, IProductDomainService domainService)
         {
-            Guard(title, slug, imageName, description, domainService);
+            Guard(title, slug,  description, domainService);
             Title = title;
-            ImageName = imageName;
+            
             Description = description;
             CategoryId = categoryId;
             SubCategoryId = subCategoryId;
             SecondarySubCategoryId = secondarySubCategoryId;
             Slug = slug.ToSlug();
             SeoData = seoData;
+        }
+        public void SetProductImageName(string imagename)
+        {
+            NullOrEmptyDomainDataException.CheckString(imagename, nameof(imagename));
+            ImageName = imagename;
         }
         public void AddImage(ProductImage image)
         {
@@ -73,15 +79,15 @@ namespace Shop.Domain.ProductAgg
             specifications.ForEach(f => f.ProductId = Id);
             Specifications = specifications;
         }
-        public void Guard(string title,string slug, string imageName, string description,IProductDomainService domainService)
+        public void Guard(string title,string slug, string description,IProductDomainService domainService)
         {
             NullOrEmptyDomainDataException.CheckString(title, nameof(title));
-            NullOrEmptyDomainDataException.CheckString(imageName, nameof(imageName));
+            
             NullOrEmptyDomainDataException.CheckString(description, nameof(description));
             NullOrEmptyDomainDataException.CheckString(slug, nameof(slug));
 
             if (slug != Slug)
-                if (domainService.SlugExist(slug.ToSlug())
+                if (domainService.SlugExist(slug.ToSlug()))
                     throw new SlugIsDuplicateException();
         }
     }
