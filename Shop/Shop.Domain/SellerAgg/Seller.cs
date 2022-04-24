@@ -59,20 +59,12 @@ namespace Shop.Domain.SellerAgg
                 throw new InvalidDomainDataException("این محصول قبلا ثبت شده است");
             Inventories.Add(inventory);
         }
-        public void EditInventory(SellerInventory newinventory)
+        public void EditInventory(long inventoryid,int count,int price,int? percentagediscount)
         {
-           var currentinventory = Inventories.FirstOrDefault(f=>f.Id==newinventory.Id);
+           var currentinventory = Inventories.FirstOrDefault(f=>f.Id==inventoryid);
             if (currentinventory == null)
                 return;
-            Inventories.Remove(currentinventory);
-            Inventories.Add(newinventory);
-        }
-        public void DeleteInventory(long inventoryid)
-        {
-            var currentinventory = Inventories.FirstOrDefault(f => f.Id == inventoryid);
-            if (currentinventory == null)
-                throw new NullOrEmptyDomainDataException();
-            Inventories.Remove(currentinventory);
+            currentinventory.Edit(count,price, percentagediscount);
         }
         public void Guard(string shopname, string nationalcode)
         {

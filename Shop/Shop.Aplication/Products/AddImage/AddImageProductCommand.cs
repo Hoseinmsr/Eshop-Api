@@ -21,4 +21,5 @@ namespace Shop.Aplication.Products.AddImage
         public long ProductId { get; private set; }
         public int Sequence { get; private set; }
     }
+    
 }
