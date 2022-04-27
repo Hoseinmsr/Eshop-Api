@@ -1,13 +1,14 @@
 ﻿using Common.Domain;
 using Common.Domain.Exceptions;
+using Common.Domain.ValueObjects;
 
 namespace Shop.Domain.UserAgg
 {
     public class UserAddress : BaseEntity
     {
-        public UserAddress(string shire, string city, string postalCode, string postalAddress, string phonenumber, string name, string family, string nationalCode)
+        public UserAddress(string shire, string city, string postalCode, string postalAddress, PhoneNumber phonenumber, string name, string family, string nationalCode)
         {
-            Guard(shire, city, postalCode, postalAddress, phonenumber, name, family, nationalCode);
+            Guard(shire, city, postalCode, postalAddress,phonenumber, name, family, nationalCode);
             Shire = shire;
             City = city;
             PostalCode = postalCode;
@@ -23,13 +24,13 @@ namespace Shop.Domain.UserAgg
         public string City { get; private set; }
         public string PostalCode { get; private set; }
         public string PostalAddress { get; private set; }
-        public string Phonenumber { get; private set; }
+        public PhoneNumber Phonenumber { get; private set; }
         public string Name { get; private set; }
         public string Family { get; private set; }
         public string NationalCode { get; private set; }
         public bool ActiveAdress { get; private set; }
 
-        public void Edit(string shire, string city, string postalCode, string postalAddress, string phonenumber, string name, string family, string nationalCode)
+        public void Edit(string shire, string city, string postalCode, string postalAddress, PhoneNumber phonenumber, string name, string family, string nationalCode)
         {
             Guard(shire,city,postalCode,postalAddress,phonenumber,name,family,nationalCode);
             Shire = shire;
@@ -46,13 +47,14 @@ namespace Shop.Domain.UserAgg
         {
             ActiveAdress = true;
         }
-        public void Guard(string shire, string city, string postalCode, string postalAddress, string phonenumber, string name, string family, string nationalCod)
+        public void Guard(string shire, string city, string postalCode, string postalAddress, PhoneNumber phonenumber, string name, string family, string nationalCod)
         {
+            if (phonenumber == null)
+                throw new NullOrEmptyDomainDataException("خالی است");
             NullOrEmptyDomainDataException.CheckString(shire, nameof(shire));
             NullOrEmptyDomainDataException.CheckString(city, nameof(city));
             NullOrEmptyDomainDataException.CheckString(postalCode, nameof(postalCode));
             NullOrEmptyDomainDataException.CheckString(postalAddress, nameof(postalAddress));
-            NullOrEmptyDomainDataException.CheckString(phonenumber, nameof(phonenumber));
             NullOrEmptyDomainDataException.CheckString(name, nameof(name));
             NullOrEmptyDomainDataException.CheckString(family, nameof(family));
             NullOrEmptyDomainDataException.CheckString(nationalCod, nameof(nationalCod));

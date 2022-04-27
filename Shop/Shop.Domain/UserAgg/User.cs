@@ -62,13 +62,13 @@ namespace Shop.Domain.UserAgg
             address.UserId = Id;
             Addresses.Add(address);
         }
-        public void EditAddress(UserAddress address)
+        public void EditAddress(UserAddress address,long addressid)
         {
-            var oldadress = Addresses.FirstOrDefault(f => f.Id == address.Id);
+            var oldadress = Addresses.FirstOrDefault(f => f.Id == addressid);
             if (oldadress == null)
                 throw new NullOrEmptyDomainDataException("Address not found");
-            Addresses.Remove(oldadress);
-            Addresses.Add(address);
+            oldadress.Edit(address.Shire, address.City, address.PostalCode, address.PostalAddress
+                , address.Phonenumber, address.Name, address.Family, address.NationalCode);
         }
         public void DeleteAddress(long addresid)
         {
