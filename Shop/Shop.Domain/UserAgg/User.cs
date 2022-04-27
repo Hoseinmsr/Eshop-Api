@@ -22,12 +22,14 @@ namespace Shop.Domain.UserAgg
             Phonenumber = phonenumber;
             Password = password;
             Gender = gender;
+            AvatarName = "avatar.png";
         }
 
         public string Name { get; private set; }
         public string Family { get; private set; }
         public string Email { get; private set; }
         public string Phonenumber { get; private set; }
+        public string AvatarName { get; private set; }
         public string Password { get; private set; }
         public Gender Gender { get; private set; }
         public List<UserRole> Roles { get; private set; }
@@ -48,6 +50,12 @@ namespace Shop.Domain.UserAgg
         public static User Register(string email,string phonenumber,string password, IDomainUserService domainservice)
         {
             return new User("", "", email,phonenumber, password, Gender.None, domainservice);
+        }
+        public void SetAvatar(string imagename)
+        {
+            if (string.IsNullOrWhiteSpace(imagename))
+                imagename = "avatar.png";
+            AvatarName = imagename;
         }
         public void AddAddress(UserAddress address)
         {

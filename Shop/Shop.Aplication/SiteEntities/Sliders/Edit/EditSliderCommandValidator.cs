@@ -11,8 +11,11 @@ namespace Shop.Aplication.SiteEntities.Sliders.Edit
             RuleFor(r => r.ImageFile)
                .JustImageFile();
             RuleFor(r => r.Link)
-                .NotNull().WithMessage(ValidationMessages.required("لینک"))
-                .NotEmpty();
+                .NotNull()
+                .NotEmpty().WithMessage(ValidationMessages.required("لینک"));
+            RuleFor(r=>r.Title)
+                .NotNull()
+                .NotEmpty().WithMessage(ValidationMessages.required("عنوان"));
         }
     }
 }

@@ -11,8 +11,8 @@ namespace Shop.Aplication.SiteEntities.Banners.Edit
             RuleFor(r => r.ImageFile)
                 .JustImageFile();
             RuleFor(r => r.Link)
-                .NotNull().WithMessage(ValidationMessages.required("لینک"))
-                .NotEmpty();
+                .NotNull()
+                .NotEmpty().WithMessage(ValidationMessages.required("لینک"));
         }
     }
 }
