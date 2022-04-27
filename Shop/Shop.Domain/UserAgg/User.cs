@@ -47,9 +47,9 @@ namespace Shop.Domain.UserAgg
             Phonenumber = phonenumber;
             Gender = gender;
         }
-        public static User Register(string email,string phonenumber,string password, IDomainUserService domainservice)
+        public static User Register(string phonenumber,string password, IDomainUserService domainservice)
         {
-            return new User("", "", email,phonenumber, password, Gender.None, domainservice);
+            return new User("", "", null,phonenumber, password, Gender.None, domainservice);
         }
         public void SetAvatar(string imagename)
         {
