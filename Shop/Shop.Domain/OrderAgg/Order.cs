@@ -1,6 +1,5 @@
 ﻿using Common.Domain;
 using Common.Domain.Exceptions;
-using Shop.Domain.OrderAgg.Enums;
 using Shop.Domain.OrderAgg.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -10,100 +9,116 @@ using System.Threading.Tasks;
 
 namespace Shop.Domain.OrderAgg
 {
-    public class Order:AggregateRoot
+    public class Order : AggregateRoot
     {
         private Order()
         {
-
         }
+
         public Order(long userId)
         {
             UserId = userId;
             Status = OrderStatus.Pending;
-            Items = new List<Orderitems>();
+            Items = new List<OrderItem>();
         }
 
-        public long UserId { get; set; }
+        public long UserId { get; private set; }
         public OrderStatus Status { get; private set; }
         public OrderDiscount? Discount { get; private set; }
-        public List<Orderitems> Items { get; private set; }
+        public OrderAddress? Address { get; private set; }
+        public ShippingMethod? ShippingMethod { get; private set; }
+        public List<OrderItem> Items { get; private set; }
+        public DateTime? LastUpdate { get; set; }
 
-        public ShippingMethod? shippingmethod { get; private set; }
-        public DateTime? LastUpdate { get; private set; }
-        public int TotlaPrice
+        public int TotalPrice
         {
             get
             {
-                var totalprice = Items.Sum(s => s.TotalPrice);
-                if (shippingmethod != null)
-                    totalprice += shippingmethod.ShippingCost;
+                var totalPrice = Items.Sum(f => f.TotalPrice);
+                if (ShippingMethod != null)
+                    totalPrice += ShippingMethod.ShippingCost;
+
                 if (Discount != null)
-                    totalprice -= Discount.DiscountAmount;
-                return totalprice;
+                    totalPrice -= Discount.DiscountAmount;
+
+                return totalPrice;
             }
         }
-        public OrderAddress? Address { get;private set; }
+
         public int ItemCount => Items.Count;
 
-
-
-        public void AddItem(Orderitems items)
+        public void AddItem(OrderItem item)
         {
-           ChangeOrderGuard();
-            var olditem = Items.FirstOrDefault(f => f.InventoryId == items.InventoryId);
-            if (olditem != null)
+            ChangeOrderGuard();
+
+            var oldItem = Items.FirstOrDefault(f => f.InventoryId == item.InventoryId);
+            if (oldItem != null)
             {
-                olditem.ChangeCount(items.Count + olditem.Count); 
+                oldItem.ChangeCount(item.Count + oldItem.Count);
+                return;
             }
-            Items.Add(items);
+            Items.Add(item);
         }
 
-        public void IncreaseItemCount(long itemid,int count)
+        public void RemoveItem(long itemId)
         {
             ChangeOrderGuard();
-            var currentitem = Items.FirstOrDefault(f => f.Id == itemid);
-            if (currentitem == null)
+
+            var currentItem = Items.FirstOrDefault(f => f.Id == itemId);
+            if (currentItem != null)
+                Items.Remove(currentItem);
+        }
+
+        public void IncreaseItemCount(long itemId, int count)
+        {
+            ChangeOrderGuard();
+
+            var currentItem = Items.FirstOrDefault(f => f.Id == itemId);
+            if (currentItem == null)
                 throw new NullOrEmptyDomainDataException();
-            currentitem.IncreaseCount(count);
+
+            currentItem.IncreaseCount(count);
         }
-        public void DecreseitemCount(long itemid, int count)
+
+        public void DecreaseItemCount(long itemId, int count)
         {
             ChangeOrderGuard();
-            var currentitem = Items.FirstOrDefault(f => f.Id == itemid);
-            if (currentitem == null)
+
+            var currentItem = Items.FirstOrDefault(f => f.Id == itemId);
+            if (currentItem == null)
                 throw new NullOrEmptyDomainDataException();
-            currentitem.DecreaseCount(count);
+
+            currentItem.DecreaseCount(count);
         }
-        public void RemoveItem(long itemid)
+
+        public void ChangeCountItem(long itemId, int newCount)
         {
             ChangeOrderGuard();
-            var currentitem = Items.FirstOrDefault(f => f.Id == itemid);
-            if(currentitem!=null)
-                Items.Remove(currentitem);
-        }
-        public void ChangeCountItem(long itemid,int newcount)
-        {
-            ChangeOrderGuard();
-            var currentitem = Items.FirstOrDefault(f => f.Id == itemid);
-            if (currentitem == null)
+
+            var currentItem = Items.FirstOrDefault(f => f.Id == itemId);
+            if (currentItem == null)
                 throw new NullOrEmptyDomainDataException();
-            currentitem.ChangeCount(newcount);
+
+            currentItem.ChangeCount(newCount);
         }
+
         public void ChangeStatus(OrderStatus status)
         {
             Status = status;
             LastUpdate = DateTime.Now;
         }
+
         public void Checkout(OrderAddress orderAddress)
         {
             ChangeOrderGuard();
+
             Address = orderAddress;
         }
+
         public void ChangeOrderGuard()
         {
             if (Status != OrderStatus.Pending)
-                throw new InvalidDomainDataException("امکان ویرایش این سفارش ممکن نمی باشد");
+                throw new InvalidDomainDataException("امکان ویرایش این سفارش وجود ندارد");
         }
-
     }
 }

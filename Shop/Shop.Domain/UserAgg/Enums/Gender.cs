@@ -10,6 +10,6 @@ namespace Shop.Domain.UserAgg.Enums
     {
         None,
         Male,
-        Female
+        Famele
     }
 }

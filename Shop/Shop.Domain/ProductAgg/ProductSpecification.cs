@@ -9,6 +9,7 @@ namespace Shop.Domain.ProductAgg
         {
             NullOrEmptyDomainDataException.CheckString(key, nameof(key));
             NullOrEmptyDomainDataException.CheckString(value, nameof(value));
+
             Key = key;
             Value = value;
         }

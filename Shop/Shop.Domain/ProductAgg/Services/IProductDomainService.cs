@@ -8,6 +8,6 @@ namespace Shop.Domain.ProductAgg.Services
 {
     public interface IProductDomainService
     {
-        bool SlugExist(string slug);
+        bool SlugIsExist(string slug);
     }
 }

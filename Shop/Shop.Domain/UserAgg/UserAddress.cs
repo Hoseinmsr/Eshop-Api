@@ -6,17 +6,25 @@ namespace Shop.Domain.UserAgg
 {
     public class UserAddress : BaseEntity
     {
-        public UserAddress(string shire, string city, string postalCode, string postalAddress, PhoneNumber phonenumber, string name, string family, string nationalCode)
+        private UserAddress()
         {
-            Guard(shire, city, postalCode, postalAddress,phonenumber, name, family, nationalCode);
+            
+        }
+        public UserAddress(string shire, string city, string postalCode, string postalAddress,
+            PhoneNumber phoneNumber, string name, string family, string nationalCode)
+        {
+            Guard(shire, city, postalCode, postalAddress,
+                phoneNumber, name, family, nationalCode);
+
             Shire = shire;
             City = city;
             PostalCode = postalCode;
             PostalAddress = postalAddress;
-            Phonenumber = phonenumber;
+            PhoneNumber = phoneNumber;
             Name = name;
             Family = family;
             NationalCode = nationalCode;
+            ActiveAddress = false;
         }
 
         public long UserId { get; internal set; }
@@ -24,43 +32,49 @@ namespace Shop.Domain.UserAgg
         public string City { get; private set; }
         public string PostalCode { get; private set; }
         public string PostalAddress { get; private set; }
-        public PhoneNumber Phonenumber { get; private set; }
+        public PhoneNumber PhoneNumber { get; private set; }
         public string Name { get; private set; }
         public string Family { get; private set; }
         public string NationalCode { get; private set; }
-        public bool ActiveAdress { get; private set; }
+        public bool ActiveAddress { get; private set; }
 
-        public void Edit(string shire, string city, string postalCode, string postalAddress, PhoneNumber phonenumber, string name, string family, string nationalCode)
+        public void Edit(string shire, string city, string postalCode, string postalAddress,
+            PhoneNumber phoneNumber, string name, string family, string nationalCode)
         {
-            Guard(shire,city,postalCode,postalAddress,phonenumber,name,family,nationalCode);
+            Guard(shire, city, postalCode, postalAddress,
+                 phoneNumber, name, family, nationalCode);
+
             Shire = shire;
             City = city;
             PostalCode = postalCode;
             PostalAddress = postalAddress;
-            Phonenumber = phonenumber;
+            PhoneNumber = phoneNumber;
             Name = name;
             Family = family;
             NationalCode = nationalCode;
-            ActiveAdress = false;
         }
+
         public void SetActive()
         {
-            ActiveAdress = true;
+            ActiveAddress = true;
         }
-        public void Guard(string shire, string city, string postalCode, string postalAddress, PhoneNumber phonenumber, string name, string family, string nationalCod)
+
+        public void Guard(string shire, string city, string postalCode, string postalAddress,
+            PhoneNumber phoneNumber, string name, string family, string nationalCode)
         {
-            if (phonenumber == null)
-                throw new NullOrEmptyDomainDataException("خالی است");
+            if (phoneNumber == null)
+                throw new NullOrEmptyDomainDataException();
+
             NullOrEmptyDomainDataException.CheckString(shire, nameof(shire));
             NullOrEmptyDomainDataException.CheckString(city, nameof(city));
             NullOrEmptyDomainDataException.CheckString(postalCode, nameof(postalCode));
             NullOrEmptyDomainDataException.CheckString(postalAddress, nameof(postalAddress));
             NullOrEmptyDomainDataException.CheckString(name, nameof(name));
             NullOrEmptyDomainDataException.CheckString(family, nameof(family));
-            NullOrEmptyDomainDataException.CheckString(nationalCod, nameof(nationalCod));
+            NullOrEmptyDomainDataException.CheckString(nationalCode, nameof(nationalCode));
 
-            if (IranianNationalIdChecker.IsValid(nationalCod) == false)
-                throw new InvalidDomainDataException("شماره ملی نا معتبر است");
+            if (IranianNationalIdChecker.IsValid(nationalCode) == false)
+                throw new InvalidDomainDataException("کدملی نامعتبر است");
         }
     }
 }

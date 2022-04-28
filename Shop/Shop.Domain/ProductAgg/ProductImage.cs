@@ -8,6 +8,7 @@ namespace Shop.Domain.ProductAgg
         public ProductImage(string imageName, int sequence)
         {
             NullOrEmptyDomainDataException.CheckString(imageName, nameof(imageName));
+
             ImageName = imageName;
             Sequence = sequence;
         }

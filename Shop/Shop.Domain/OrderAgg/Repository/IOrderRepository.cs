@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Shop.Domain.OrderAgg.Repository
 {
-    public interface IOrderRepository:IBaseRepository<Order>
+    public interface IOrderRepository : IBaseRepository<Order>
     {
-        Task<Order> GetUserCurrentOrder(long userId);
+        Task<Order> GetCurrentUserOrder(long userId);
     }
 }

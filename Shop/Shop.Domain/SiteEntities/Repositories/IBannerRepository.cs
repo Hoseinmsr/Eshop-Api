@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 
 namespace Shop.Domain.SiteEntities.Repositories
 {
-    public interface IBannerRepository:IBaseRepository<Banner>
+    public interface IBannerRepository : IBaseRepository<Banner>
     {
+        void Delete(Banner banner);
     }
 }

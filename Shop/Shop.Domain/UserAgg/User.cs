@@ -12,95 +12,147 @@ namespace Shop.Domain.UserAgg
 {
     public class User : AggregateRoot
     {
-        public User(string name, string family, string email, string phonenumber, string password, Gender gender,
-            IDomainUserService domainservice)
+        private User()
         {
-            Guard(email, phonenumber, domainservice);
+
+        }
+        public User(string name, string family, string phoneNumber, string email,
+            string password, Gender gender, IUserDomainService userDomainService)
+        {
+            Guard(phoneNumber, email, userDomainService);
+
             Name = name;
             Family = family;
+            PhoneNumber = phoneNumber;
             Email = email;
-            Phonenumber = phonenumber;
             Password = password;
             Gender = gender;
             AvatarName = "avatar.png";
+            IsActive = true;
+            Roles = new();
+            Wallets = new();
+            Addresses = new();
+            Tokens = new();
         }
 
         public string Name { get; private set; }
         public string Family { get; private set; }
+        public string PhoneNumber { get; private set; }
         public string Email { get; private set; }
-        public string Phonenumber { get; private set; }
-        public string AvatarName { get; private set; }
         public string Password { get; private set; }
+        public string AvatarName { get; set; }
+        public bool IsActive { get; set; }
+
         public Gender Gender { get; private set; }
-        public List<UserRole> Roles { get; private set; }
-        public List<Wallet> Wallets { get; private set; }
-        public List<UserAddress> Addresses { get; private set; }
+        public List<UserRole> Roles { get; }
+        public List<Wallet> Wallets { get; }
+        public List<UserAddress> Addresses { get; }
+        public List<UserToken> Tokens { get; }
 
-
-
-        public void Edit(string name, string family, string email, string phonenumber, Gender gender,IDomainUserService domainservice)
+        public void Edit(string name, string family, string phoneNumber, string email,
+            Gender gender, IUserDomainService userDomainService)
         {
-            Guard(email, phonenumber,domainservice);
+            Guard(phoneNumber, email, userDomainService);
             Name = name;
             Family = family;
+            PhoneNumber = phoneNumber;
             Email = email;
-            Phonenumber = phonenumber;
             Gender = gender;
         }
-        public static User Register(string phonenumber,string password, IDomainUserService domainservice)
+
+        public void ChangePassword(string newPassword)
         {
-            return new User("", "", null,phonenumber, password, Gender.None, domainservice);
+            NullOrEmptyDomainDataException.CheckString(newPassword, nameof(newPassword));
+
+            Password = newPassword;
         }
-        public void SetAvatar(string imagename)
+        public static User RegisterUser(string phoneNumber, string password, IUserDomainService userDomainService)
         {
-            if (string.IsNullOrWhiteSpace(imagename))
-                imagename = "avatar.png";
-            AvatarName = imagename;
+            return new User("", "", phoneNumber, null, password, Gender.None, userDomainService);
+        }
+
+        public void SetAvatar(string imageName)
+        {
+            if (string.IsNullOrWhiteSpace(imageName))
+                imageName = "avatar.png";
+
+            AvatarName = imageName;
         }
         public void AddAddress(UserAddress address)
         {
             address.UserId = Id;
             Addresses.Add(address);
         }
-        public void EditAddress(UserAddress address,long addressid)
+
+        public void DeleteAddress(long addressId)
         {
-            var oldadress = Addresses.FirstOrDefault(f => f.Id == addressid);
-            if (oldadress == null)
-                throw new NullOrEmptyDomainDataException("Address not found");
-            oldadress.Edit(address.Shire, address.City, address.PostalCode, address.PostalAddress
-                , address.Phonenumber, address.Name, address.Family, address.NationalCode);
+            var oldAddress = Addresses.FirstOrDefault(f => f.Id == addressId);
+            if (oldAddress == null)
+                throw new NullOrEmptyDomainDataException("Address Not found");
+
+            Addresses.Remove(oldAddress);
         }
-        public void DeleteAddress(long addresid)
+
+        public void EditAddress(UserAddress address, long addressId)
         {
-            var oldadress = Addresses.FirstOrDefault(f => f.Id == addresid);
-            if (oldadress == null)
-                throw new NullOrEmptyDomainDataException("Address not found");
-            Addresses.Remove(oldadress);
+            var oldAddress = Addresses.FirstOrDefault(f => f.Id == addressId);
+            if (oldAddress == null)
+                throw new NullOrEmptyDomainDataException("Address Not found");
+
+
+            oldAddress.Edit(address.Shire, address.City, address.PostalCode, address.PostalAddress, address.PhoneNumber,
+                address.Name, address.Family, address.NationalCode);
         }
+
         public void ChargeWallet(Wallet wallet)
         {
             wallet.UserId = Id;
             Wallets.Add(wallet);
         }
+
         public void SetRoles(List<UserRole> roles)
         {
             roles.ForEach(f => f.UserId = Id);
             Roles.Clear();
             Roles.AddRange(roles);
         }
-        public void Guard(string email, string phonenumber,IDomainUserService domainservice)
+
+        public void AddToken(string hashJwtToken, string hashRefreshToken, DateTime tokenExpireDate, DateTime refreshTokenExpireDate, string device)
         {
-            NullOrEmptyDomainDataException.CheckString(phonenumber, nameof(phonenumber));
-            NullOrEmptyDomainDataException.CheckString(email, nameof(email));
-            if (phonenumber.Length != 11)
-                throw new InvalidDomainDataException("شماره وارد شده معتبر نمیباشد");
-            if (email.IsValidEmail() == false)
-                throw new InvalidDomainDataException("ایمیل وارد شده نا معتبر است");
-            if (phonenumber != Phonenumber)
-                if (domainservice.IsPhonenumberExist(phonenumber))
+            var activeTokenCount = Tokens.Count(c => c.RefreshTokenExpireDate > DateTime.Now);
+            if (activeTokenCount == 3)
+                throw new InvalidDomainDataException("امکان استفاده از 4 دستگاه همزمان وجود ندارد");
+
+            var token = new UserToken(hashJwtToken, hashRefreshToken, tokenExpireDate, refreshTokenExpireDate, device);
+            token.UserId = Id;
+            Tokens.Add(token);
+        }
+
+        public void RemoveToken(long tokenId)
+        {
+            var token = Tokens.FirstOrDefault(f => f.Id == tokenId);
+            if (token == null)
+                throw new InvalidDomainDataException("invalid TokenId");
+
+            Tokens.Remove(token);
+        }
+        public void Guard(string phoneNumber, string email, IUserDomainService userDomainService)
+        {
+            NullOrEmptyDomainDataException.CheckString(phoneNumber, nameof(phoneNumber));
+
+            if (phoneNumber.Length != 11)
+                throw new InvalidDomainDataException("شماره موبایل نامعتبر است");
+
+            if (!string.IsNullOrWhiteSpace(email))
+                if (email.IsValidEmail() == false)
+                    throw new InvalidDomainDataException(" ایمیل  نامعتبر است");
+
+            if (phoneNumber != PhoneNumber)
+                if (userDomainService.PhoneNumberIsExist(phoneNumber))
                     throw new InvalidDomainDataException("شماره موبایل تکراری است");
+
             if (email != Email)
-                if (domainservice.IsEmailExist(email))
+                if (userDomainService.IsEmailExist(email))
                     throw new InvalidDomainDataException("ایمیل تکراری است");
         }
     }
